@@ -75,6 +75,53 @@
       margin-bottom: 8px;
       font-size: 16px;
     }
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toggle-label {
+      font-size: 14px;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    .toggle-switch input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    .toggle-switch input:checked + .slider:before {
+      transform: translateX(26px);
+    }
   </style>
 </head>
 <body>
@@ -84,7 +131,15 @@
 
   <div class="form-group">
     <input type="text" id="nameInput" placeholder="名前を入力" />
-    <label><input type="checkbox" id="fillByFour" /> 4人グループを優先（1人余りなし）</label>
+
+    <div class="toggle-container">
+      <label class="toggle-switch">
+        <input type="checkbox" id="fillByFour" />
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">4人グループを優先（1人余りなし）</span>
+    </div>
+
     <button id="addBtn" onclick="addName()">追加</button>
     <button id="groupBtn" onclick="createGroups()">グループ作成</button>
   </div>

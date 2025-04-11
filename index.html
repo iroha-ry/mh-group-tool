@@ -138,7 +138,7 @@
         <input type="checkbox" id="fillByFour" />
         <span class="slider"></span>
       </label>
-      <span>4人グループを優先</span>
+      <span>4人グループを優先（1人余りは避ける）</span>
     </div>
   </div>
 
@@ -191,6 +191,14 @@
       }
     }
 
+    function calculateGroupCountPreferFour(total) {
+      if (total <= 4) return 1;
+      for (let g = Math.floor(total / 4); g >= 2; g--) {
+        if (total % g !== 1) return g;
+      }
+      return 2;
+    }
+
     function createGroups() {
       if (names.length === 0) return;
 
@@ -202,19 +210,13 @@
       let groups = [];
 
       if (useFourMode) {
-        let groupCount = Math.floor(total / 4);
-        if (groupCount < 1) groupCount = 1;
-        while (groupCount > 1 && total % groupCount === 1) {
-          groupCount--;
-        }
-
+        const groupCount = calculateGroupCountPreferFour(total);
         groups = Array.from({ length: groupCount }, () => []);
         shuffledNames.forEach((name, i) => {
           const weapon = getRandomWeapon();
           const groupIndex = i % groupCount;
           groups[groupIndex].push({ name, weapon });
         });
-
       } else {
         const groupSize = 4;
         const groupCount = Math.ceil(total / groupSize);

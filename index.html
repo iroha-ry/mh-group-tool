@@ -200,32 +200,36 @@
       const shuffledNames = [...names];
       shuffle(shuffledNames);
     
+      const total = shuffledNames.length;
       let groups = [];
     
       if (useFourMode) {
-        // === 4人優先モード（ただし1人余りは回避） ===
-        let groupCount = Math.floor(shuffledNames.length / 4);
-        while (groupCount > 0) {
-          const remainder = shuffledNames.length % groupCount;
-          if (remainder !== 1) break;
-          groupCount--;
+        // 4人優先＆1人余り禁止
+        let groupCount = Math.floor(total / 4);
+        while (groupCount > 1 && total % groupCount === 1) {
+          groupCount--; // 1人余りを避ける
         }
+    
         groups = Array.from({ length: groupCount }, () => []);
-        shuffledNames.forEach((entry, i) => {
+    
+        shuffledNames.forEach((name, i) => {
           const weapon = getRandomWeapon();
-          groups[i % groupCount].push({ name: entry, weapon });
+          groups[i % groupCount].push({ name, weapon });
         });
+    
       } else {
-        // === 均等分けモード ===
+        // 通常モード：均等に分配
         const groupSize = 4;
-        const groupCount = Math.ceil(shuffledNames.length / groupSize);
+        const groupCount = Math.ceil(total / groupSize);
         groups = Array.from({ length: groupCount }, () => []);
-        shuffledNames.forEach((entry, i) => {
+    
+        shuffledNames.forEach((name, i) => {
           const weapon = getRandomWeapon();
-          groups[i % groupCount].push({ name: entry, weapon });
+          groups[i % groupCount].push({ name, weapon });
         });
       }
     
+      // 出力
       const resultDiv = document.getElementById("result");
       resultDiv.innerHTML = "<h3>グループ結果：</h3>";
       groups.forEach((group, index) => {

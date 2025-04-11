@@ -1,11 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>モンハン グループ分けツール</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    #nameList { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    body {
+      font-family: sans-serif;
+      padding: 16px;
+      max-width: 600px;
+      margin: auto;
+      background-color: #f4f4f4;
+    }
+    h2 {
+      text-align: center;
+    }
+    #nameList {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
     .nameIcon {
       padding: 10px 15px;
       background: #4CAF50;
@@ -18,14 +34,46 @@
     .nameIcon:hover {
       background: #f44336;
     }
-    input[type="text"] { padding: 8px; width: 70%; }
-    button { padding: 8px 15px; margin-left: 10px; margin-top: 10px; }
+    .form-group {
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+      margin-bottom: 16px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #addBtn {
+      background-color: #2196F3;
+      color: white;
+    }
+    #groupBtn {
+      background-color: #FF9800;
+      color: white;
+    }
     .group {
       margin-top: 15px;
-      padding: 10px;
+      padding: 12px;
       border: 1px solid #ccc;
       border-radius: 10px;
-      background: #f9f9f9;
+      background: #ffffff;
+    }
+    .group strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -34,15 +82,16 @@
 
   <div id="nameList"></div>
 
-  <input type="text" id="nameInput" placeholder="名前を入力">
-  <button onclick="addName()">追加</button>
-  <button onclick="createGroups()">グループ作成</button>
+  <div class="form-group">
+    <input type="text" id="nameInput" placeholder="名前を入力" />
+    <button id="addBtn" onclick="addName()">追加</button>
+    <button id="groupBtn" onclick="createGroups()">グループ作成</button>
+  </div>
 
   <div id="result"></div>
 
   <script>
     const names = [];
-
     const weapons = [
       "大剣", "太刀", "片手剣", "双剣", "ハンマー", "狩猟笛",
       "ランス", "ガンランス", "スラッシュアックス", "チャージアックス",
@@ -75,7 +124,7 @@
         const span = document.createElement("span");
         span.className = "nameIcon";
         span.innerText = name;
-        span.title = "クリックで削除";
+        span.title = "タップで削除";
         span.onclick = () => removeName(index);
         container.appendChild(span);
       });
@@ -112,8 +161,8 @@
       groups.forEach((group, index) => {
         const div = document.createElement("div");
         div.className = "group";
-        div.innerHTML = `<strong>グループ ${index + 1}</strong><br>` +
-          group.map(e => `${e.name}（${e.weapon}）`).join("<br>");
+        div.innerHTML = `<strong>グループ ${index + 1}</strong>` +
+          group.map(e => `<div>${e.name}（${e.weapon}）</div>`).join("");
         resultDiv.appendChild(div);
       });
     }

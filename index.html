@@ -78,12 +78,13 @@
   </style>
 </head>
 <body>
-  <h2>モンハン グループ分け</h2>
+  <h2>モンハン グループ分け（4人優先）</h2>
 
   <div id="nameList"></div>
 
   <div class="form-group">
     <input type="text" id="nameInput" placeholder="名前を入力" />
+    <label><input type="checkbox" id="fillByFour" /> 4人グループを優先（1人余りなし）</label>
     <button id="addBtn" onclick="addName()">追加</button>
     <button id="groupBtn" onclick="createGroups()">グループ作成</button>
   </div>
@@ -140,21 +141,42 @@
     function createGroups() {
       if (names.length === 0) return;
 
-      const shuffledNames = [...names];
-      shuffle(shuffledNames);
+      const shuffled = [...names];
+      shuffle(shuffled);
 
-      const playersWithWeapons = shuffledNames.map(name => ({
-        name: name,
-        weapon: getRandomWeapon()
-      }));
+      const fillByFour = document.getElementById("fillByFour").checked;
+      let groups = [];
 
-      const groupSize = 4;
-      const groupCount = Math.ceil(playersWithWeapons.length / groupSize);
-      const groups = Array.from({ length: groupCount }, () => []);
+      if (fillByFour) {
+        const total = shuffled.length;
+        let count = Math.floor(total / 4);
 
-      playersWithWeapons.forEach((entry, i) => {
-        groups[i % groupCount].push(entry);
-      });
+        while (total - count * 4 === 1 && count > 0) {
+          count--;
+        }
+
+        const remaining = total - count * 4;
+        let idx = 0;
+
+        for (let i = 0; i < count; i++) {
+          groups.push(shuffled.slice(idx, idx + 4));
+          idx += 4;
+        }
+
+        if (remaining > 0) {
+          const remainingGroup = shuffled.slice(idx);
+          for (let i = 0; i < remainingGroup.length; i++) {
+            groups[i % groups.length].push(remainingGroup[i]);
+          }
+        }
+      } else {
+        const groupSize = 4;
+        const groupCount = Math.ceil(shuffled.length / groupSize);
+        groups = Array.from({ length: groupCount }, () => []);
+        shuffled.forEach((name, i) => {
+          groups[i % groupCount].push(name);
+        });
+      }
 
       const resultDiv = document.getElementById("result");
       resultDiv.innerHTML = "<h3>グループ結果：</h3>";
@@ -162,7 +184,7 @@
         const div = document.createElement("div");
         div.className = "group";
         div.innerHTML = `<strong>グループ ${index + 1}</strong>` +
-          group.map(e => `<div>${e.name}（${e.weapon}）</div>`).join("");
+          group.map(name => `<div>${name}（${getRandomWeapon()}）</div>`).join("");
         resultDiv.appendChild(div);
       });
     }

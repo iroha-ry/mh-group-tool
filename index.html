@@ -195,48 +195,51 @@
 
     function createGroups() {
       if (names.length === 0) return;
-    
-      const useFourMode = document.getElementById("fillByFour").checked;
-      const shuffledNames = [...names];
-      shuffle(shuffledNames);
-    
-      const total = shuffledNames.length;
+
+      const shuffled = [...names];
+      shuffle(shuffled);
+
+      const fillByFour = document.getElementById("fillByFour").checked;
       let groups = [];
-    
-      if (useFourMode) {
-        // 4人優先＆1人余り禁止
-        let groupCount = Math.floor(total / 4);
-        while (groupCount > 1 && total % groupCount === 1) {
-          groupCount--; // 1人余りを避ける
+
+      if (fillByFour) {
+        const total = shuffled.length;
+        let count = Math.floor(total / 4);
+
+        while (total - count * 4 === 1 && count > 0) {
+          count--;
         }
-    
-        groups = Array.from({ length: groupCount }, () => []);
-    
-        shuffledNames.forEach((name, i) => {
-          const weapon = getRandomWeapon();
-          groups[i % groupCount].push({ name, weapon });
-        });
-    
+
+        const remaining = total - count * 4;
+        let idx = 0;
+
+        for (let i = 0; i < count; i++) {
+          groups.push(shuffled.slice(idx, idx + 4));
+          idx += 4;
+        }
+
+        if (remaining > 0) {
+          const remainingGroup = shuffled.slice(idx);
+          for (let i = 0; i < remainingGroup.length; i++) {
+            groups[i % groups.length].push(remainingGroup[i]);
+          }
+        }
       } else {
-        // 通常モード：均等に分配
         const groupSize = 4;
-        const groupCount = Math.ceil(total / groupSize);
+        const groupCount = Math.ceil(shuffled.length / groupSize);
         groups = Array.from({ length: groupCount }, () => []);
-    
-        shuffledNames.forEach((name, i) => {
-          const weapon = getRandomWeapon();
-          groups[i % groupCount].push({ name, weapon });
+        shuffled.forEach((name, i) => {
+          groups[i % groupCount].push(name);
         });
       }
-    
-      // 出力
+
       const resultDiv = document.getElementById("result");
       resultDiv.innerHTML = "<h3>グループ結果：</h3>";
       groups.forEach((group, index) => {
         const div = document.createElement("div");
         div.className = "group";
         div.innerHTML = `<strong>グループ ${index + 1}</strong>` +
-          group.map(e => `<div>${e.name}（${e.weapon}）</div>`).join("");
+          group.map(name => `<div>${name}（${getRandomWeapon()}）</div>`).join("");
         resultDiv.appendChild(div);
       });
     }

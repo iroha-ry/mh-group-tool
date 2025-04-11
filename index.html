@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>モンハン グループ分けツール（4人優先）</title>
+  <title>モンハン グループ分け</title>
   <style>
     body {
       font-family: sans-serif;
@@ -12,10 +12,7 @@
       margin: auto;
       background-color: #f4f4f4;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+    h2 { text-align: center; }
     #nameList {
       display: flex;
       flex-wrap: wrap;
@@ -30,116 +27,52 @@
       border-radius: 20px;
       font-size: 14px;
       cursor: pointer;
-      transition: background 0.2s;
     }
     .nameIcon:hover {
       background: #f44336;
     }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
     input[type="text"] {
       padding: 10px;
       font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
       width: 100%;
       box-sizing: border-box;
     }
     button {
-      padding: 12px;
+      padding: 10px;
       font-size: 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
     }
-    #addBtn {
-      background-color: #2196F3;
-      color: white;
-    }
-    #groupBtn {
-      background-color: #FF9800;
-      color: white;
-    }
+    #addBtn { background-color: #2196F3; color: white; }
+    #groupBtn { background-color: #FF9800; color: white; margin-top: 10px; }
     .group {
       margin-top: 15px;
-      padding: 12px;
+      padding: 10px;
+      background: white;
       border: 1px solid #ccc;
-      border-radius: 10px;
-      background: #ffffff;
+      border-radius: 8px;
     }
-    .group strong {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 16px;
-    }
-
-    /* トグルスイッチ */
     .toggle-container {
       display: flex;
       align-items: center;
       gap: 10px;
       margin-top: 10px;
     }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 48px;
-      height: 24px;
-    }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0;
-      right: 0; bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 24px;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-    input:checked + .slider {
-      background-color: #4CAF50;
-    }
-    input:checked + .slider:before {
-      transform: translateX(24px);
-    }
   </style>
 </head>
 <body>
-  <h2>モンハン グループ分け（4人優先）</h2>
+  <h2>モンハン グループ分け</h2>
 
   <div id="nameList"></div>
 
-  <div class="form-group">
-    <input type="text" id="nameInput" placeholder="名前を入力" />
-    <button id="addBtn" onclick="addName()">追加</button>
-    <button id="groupBtn" onclick="createGroups()">グループ作成</button>
+  <input type="text" id="nameInput" placeholder="名前を入力">
+  <button id="addBtn" onclick="addName()">追加</button>
+  <button id="groupBtn" onclick="createGroups()">グループ作成</button>
 
-    <div class="toggle-container">
-      <label class="switch">
-        <input type="checkbox" id="fillByFour" />
-        <span class="slider"></span>
-      </label>
-      <span>4人グループを優先（1人余りは避ける）</span>
-    </div>
+  <div class="toggle-container">
+    <input type="checkbox" id="fillByFour">
+    <label for="fillByFour">4人優先モード</label>
   </div>
 
   <div id="result"></div>
@@ -191,40 +124,42 @@
       }
     }
 
-    function calculateGroupCountPreferFour(total) {
-      if (total <= 4) return 1;
-      for (let g = Math.floor(total / 4); g >= 2; g--) {
-        if (total % g !== 1) return g;
-      }
-      return 2;
-    }
-
     function createGroups() {
       if (names.length === 0) return;
+      const useMax4 = document.getElementById("fillByFour").checked;
+      const shuffled = [...names];
+      shuffle(shuffled);
 
-      const useFourMode = document.getElementById("fillByFour").checked;
-      const shuffledNames = [...names];
-      shuffle(shuffledNames);
-
-      const total = shuffledNames.length;
       let groups = [];
 
-      if (useFourMode) {
-        const groupCount = calculateGroupCountPreferFour(total);
-        groups = Array.from({ length: groupCount }, () => []);
-        shuffledNames.forEach((name, i) => {
-          const weapon = getRandomWeapon();
-          const groupIndex = i % groupCount;
-          groups[groupIndex].push({ name, weapon });
-        });
+      if (useMax4) {
+        // 最大4人グループで分ける
+        let i = 0;
+        while (i < shuffled.length) {
+          const remaining = shuffled.length - i;
+          if (remaining === 1) {
+            // 最後1人は前のグループに入れる（最大4人維持）
+            groups[groups.length - 1].push({
+              name: shuffled[i],
+              weapon: getRandomWeapon()
+            });
+            i++;
+          } else {
+            const size = remaining >= 4 ? 4 : remaining;
+            groups.push(shuffled.slice(i, i + size).map(name => ({
+              name,
+              weapon: getRandomWeapon()
+            })));
+            i += size;
+          }
+        }
       } else {
-        const groupSize = 4;
-        const groupCount = Math.ceil(total / groupSize);
+        // 均等に分ける（なるべく人数バラけない）
+        const groupCount = Math.ceil(shuffled.length / 4);
         groups = Array.from({ length: groupCount }, () => []);
-        shuffledNames.forEach((name, i) => {
+        shuffled.forEach((name, i) => {
           const weapon = getRandomWeapon();
-          const groupIndex = i % groupCount;
-          groups[groupIndex].push({ name, weapon });
+          groups[i % groupCount].push({ name, weapon });
         });
       }
 
@@ -233,8 +168,8 @@
       groups.forEach((group, index) => {
         const div = document.createElement("div");
         div.className = "group";
-        div.innerHTML = `<strong>グループ ${index + 1}</strong>` +
-          group.map(e => `<div>${e.name}（${e.weapon}）</div>`).join("");
+        div.innerHTML = `<strong>グループ ${index + 1}</strong><br>` +
+          group.map(e => `${e.name}（${e.weapon}）`).join("<br>");
         resultDiv.appendChild(div);
       });
     }
